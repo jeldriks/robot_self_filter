@@ -5,6 +5,7 @@
 
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
+#include <std_msgs/msg/string.hpp>
 #include <tf2_ros/buffer.h>
 #include <tf2_ros/create_timer_ros.h>
 #include <tf2_ros/transform_listener.h>
@@ -55,6 +56,7 @@ namespace robot_self_filter
       this->declare_parameter<int>("max_queue_size", 10);
       this->declare_parameter<int>("lidar_sensor_type", 0);
       this->declare_parameter<std::string>("robot_description", "");
+      this->declare_parameter<std::string>("robot_description_topic", "/robot_description");
       this->declare_parameter<std::string>("in_pointcloud_topic", "/cloud_in");
 
       sensor_frame_ = this->get_parameter("sensor_frame").as_string();
@@ -91,6 +93,38 @@ namespace robot_self_filter
     {
       std::string robot_description_xml = this->get_parameter("robot_description").as_string();
 
+      if (!robot_description_xml.empty())
+      {
+        RCLCPP_INFO(this->get_logger(), "Using robot description from parameter");
+        setupFilter();
+        return;
+      }
+
+      std::string topic = this->get_parameter("robot_description_topic").as_string();
+      RCLCPP_INFO(this->get_logger(), "No robot_description parameter provided, subscribing to topic: %s", topic.c_str());
+
+      robot_desc_sub_ = this->create_subscription<std_msgs::msg::String>(
+          topic,
+          rclcpp::QoS(1).transient_local(),
+          std::bind(&SelfFilterNode::robotDescriptionCallback, this, std::placeholders::_1));
+    }
+
+  private:
+    void robotDescriptionCallback(const std_msgs::msg::String::SharedPtr msg)
+    {
+      if (msg->data.empty())
+      {
+        RCLCPP_WARN(this->get_logger(), "Received empty robot description from topic, ignoring");
+        return;
+      }
+      RCLCPP_INFO(this->get_logger(), "Received robot description from topic");
+      this->set_parameter(rclcpp::Parameter("robot_description", msg->data));
+      robot_desc_sub_.reset();
+      setupFilter();
+    }
+
+    void setupFilter()
+    {
       switch (sensor_type_)
       {
       case SensorType::XYZSensor:
@@ -129,7 +163,6 @@ namespace robot_self_filter
           std::bind(&SelfFilterNode::cloudCallback, this, std::placeholders::_1));
     }
 
-  private:
     void cloudCallback(const sensor_msgs::msg::PointCloud2::ConstSharedPtr &cloud)
     {
       RCLCPP_INFO(this->get_logger(), "Received cloud message with timestamp %.6f",
@@ -306,6 +339,7 @@ namespace robot_self_filter
     std::shared_ptr<filters::SelfFilterInterface> self_filter_;
 
     rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr sub_;
+    rclcpp::Subscription<std_msgs::msg::String>::SharedPtr robot_desc_sub_;
     rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pointCloudPublisher_;
     rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr marker_pub_;
 

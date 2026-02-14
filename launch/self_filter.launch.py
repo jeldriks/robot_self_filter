@@ -7,10 +7,6 @@ from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
 
 def generate_launch_description():
-    description_name_arg = DeclareLaunchArgument(
-        'description_name',
-        default_value='/robot_description'
-    )
     zero_for_removed_points_arg = DeclareLaunchArgument(
         'zero_for_removed_points',
         default_value='true'
@@ -28,7 +24,12 @@ def generate_launch_description():
         default_value='/cloud_out'
     )
     robot_description_arg = DeclareLaunchArgument(
-        'robot_description'
+        'robot_description',
+        default_value=''
+    )
+    robot_description_topic_arg = DeclareLaunchArgument(
+        'robot_description_topic',
+        default_value='/robot_description'
     )
     filter_config_arg = DeclareLaunchArgument(
         'filter_config'
@@ -56,24 +57,24 @@ def generate_launch_description():
                     LaunchConfiguration('robot_description'),
                     value_type=str
                 ),
+                'robot_description_topic': LaunchConfiguration('robot_description_topic'),
                 'zero_for_removed_points': LaunchConfiguration('zero_for_removed_points'),
                 'use_sim_time': LaunchConfiguration('use_sim_time') # Use the launch argument
             }
         ],
         remappings=[
-            ('/robot_description', LaunchConfiguration('description_name')),
             ('/cloud_in', LaunchConfiguration('in_pointcloud_topic')),
             ('/cloud_out', LaunchConfiguration('out_pointcloud_topic')),
         ],
     )
 
     return LaunchDescription([
-        description_name_arg,
         zero_for_removed_points_arg,
         lidar_sensor_type_arg,
         in_pointcloud_topic_arg,
         out_pointcloud_topic_arg,
         robot_description_arg,
+        robot_description_topic_arg,
         filter_config_arg,
         use_sim_time_arg, # Add to launch description
         log_config,
