@@ -34,6 +34,11 @@ def generate_launch_description():
     filter_config_arg = DeclareLaunchArgument(
         'filter_config'
     )
+    sensor_frame_arg = DeclareLaunchArgument(
+        'sensor_frame',
+        default_value='Lidar',
+        description='TF frame of the sensor'
+    )
     # Declare use_sim_time argument
     use_sim_time_arg = DeclareLaunchArgument(
         'use_sim_time',
@@ -59,6 +64,7 @@ def generate_launch_description():
                 ),
                 'robot_description_topic': LaunchConfiguration('robot_description_topic'),
                 'zero_for_removed_points': LaunchConfiguration('zero_for_removed_points'),
+                'sensor_frame': LaunchConfiguration('sensor_frame'),
                 'use_sim_time': LaunchConfiguration('use_sim_time') # Use the launch argument
             }
         ],
@@ -76,6 +82,7 @@ def generate_launch_description():
         robot_description_arg,
         robot_description_topic_arg,
         filter_config_arg,
+        sensor_frame_arg,
         use_sim_time_arg, # Add to launch description
         log_config,
         self_filter_node

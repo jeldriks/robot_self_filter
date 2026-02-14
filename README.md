@@ -80,6 +80,7 @@ When `robot_description` is provided as a non-empty parameter, it takes priority
 | `out_pointcloud_topic` | string | `/cloud_out` | Filtered point cloud topic |
 | `lidar_sensor_type` | int | `2` | Sensor type (0: XYZ, 1: XYZRGB, 2: Ouster, 3: Hesai, 4: Robosense, 5: Pandar, 6: XYZI) |
 | `zero_for_removed_points` | bool | `true` | Set filtered points to zero instead of removing |
+| `sensor_frame` | string | `Lidar` | TF frame of the sensor |
 | `use_sim_time` | bool | `true` | Use simulation time |
 
 ## Configuration
