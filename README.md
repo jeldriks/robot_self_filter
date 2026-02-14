@@ -62,7 +62,7 @@ ros2 launch robot_self_filter self_filter.launch.py \
 | `filter_config` | string | - | Path to YAML configuration file |
 | `in_pointcloud_topic` | string | `/cloud_in` | Input point cloud topic |
 | `out_pointcloud_topic` | string | `/cloud_out` | Filtered point cloud topic |
-| `lidar_sensor_type` | int | `2` | Sensor type (0: XYZ, 1: XYZRGB, 2: Ouster, 3: Hesai, 4: Robosense, 5: Pandar) |
+| `lidar_sensor_type` | int | `2` | Sensor type (0: XYZ, 1: XYZRGB, 2: Ouster, 3: Hesai, 4: Robosense, 5: Pandar, 6: XYZI) |
 | `zero_for_removed_points` | bool | `true` | Set filtered points to zero instead of removing |
 | `use_sim_time` | bool | `true` | Use simulation time |
 | `description_name` | string | `/robot_description` | Robot description parameter namespace |
@@ -160,6 +160,7 @@ The package supports multiple sensor types through the `lidar_sensor_type` param
 | 3 | Hesai | Custom Hesai point type |
 | 4 | Robosense | Custom Robosense point type |
 | 5 | Pandar | Custom Pandar point type |
+| 6 | Generic XYZI | `pcl::PointXYZI` |
 
 ## Examples
 

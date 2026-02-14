@@ -31,6 +31,7 @@ namespace robot_self_filter
     HesaiSensor = 3,
     RobosenseSensor = 4,
     PandarSensor = 5,
+    XYZISensor = 6,
   };
 
   class SelfFilterNode : public rclcpp::Node
@@ -110,6 +111,9 @@ namespace robot_self_filter
       case SensorType::PandarSensor:
         self_filter_ = std::make_shared<filters::SelfFilter<PointPandar>>(this->shared_from_this());
         break;
+      case SensorType::XYZISensor:
+        self_filter_ = std::make_shared<filters::SelfFilter<pcl::PointXYZI>>(this->shared_from_this());
+        break;
       default:
         self_filter_ = std::make_shared<filters::SelfFilter<pcl::PointXYZ>>(this->shared_from_this());
         break;
@@ -158,6 +162,15 @@ namespace robot_self_filter
         if (!sf_ouster)
           return;
         auto mask = sf_ouster->getSelfMaskPtr();
+        publishShapesFromMask(mask, cloud->header.frame_id);
+        break;
+      }
+      case SensorType::XYZISensor:
+      {
+        auto sf_xyzi = std::dynamic_pointer_cast<filters::SelfFilter<pcl::PointXYZI>>(self_filter_);
+        if (!sf_xyzi)
+          return;
+        auto mask = sf_xyzi->getSelfMaskPtr();
         publishShapesFromMask(mask, cloud->header.frame_id);
         break;
       }
