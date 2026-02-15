@@ -57,6 +57,8 @@ def generate_launch_description():
         parameters=[
             LaunchConfiguration('filter_config'),  # loads the YAML file
             {
+                'in_pointcloud_topic': LaunchConfiguration('in_pointcloud_topic'),
+                'out_pointcloud_topic': LaunchConfiguration('out_pointcloud_topic'),
                 'lidar_sensor_type': LaunchConfiguration('lidar_sensor_type'),
                 'robot_description': ParameterValue(
                     LaunchConfiguration('robot_description'),
@@ -67,11 +69,7 @@ def generate_launch_description():
                 'sensor_frame': LaunchConfiguration('sensor_frame'),
                 'use_sim_time': LaunchConfiguration('use_sim_time') # Use the launch argument
             }
-        ],
-        remappings=[
-            ('/cloud_in', LaunchConfiguration('in_pointcloud_topic')),
-            ('/cloud_out', LaunchConfiguration('out_pointcloud_topic')),
-        ],
+        ]
     )
 
     return LaunchDescription([

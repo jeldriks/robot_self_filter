@@ -57,7 +57,8 @@ namespace robot_self_filter
       this->declare_parameter<int>("lidar_sensor_type", 0);
       this->declare_parameter<std::string>("robot_description", "");
       this->declare_parameter<std::string>("robot_description_topic", "/robot_description");
-      this->declare_parameter<std::string>("in_pointcloud_topic", "/cloud_in");
+      this->declare_parameter<std::string>("in_pointcloud_topic", "cloud_in");
+      this->declare_parameter<std::string>("out_pointcloud_topic", "cloud_out");
 
       sensor_frame_ = this->get_parameter("sensor_frame").as_string();
       use_rgb_ = this->get_parameter("use_rgb").as_bool();
@@ -65,6 +66,7 @@ namespace robot_self_filter
       int temp_sensor_type = this->get_parameter("lidar_sensor_type").as_int();
       sensor_type_ = static_cast<SensorType>(temp_sensor_type);
       in_topic_ = this->get_parameter("in_pointcloud_topic").as_string();
+      out_topic_ = this->get_parameter("out_pointcloud_topic").as_string();
 
       RCLCPP_INFO(this->get_logger(), "Parameters:");
       RCLCPP_INFO(this->get_logger(), "  sensor_frame: %s", sensor_frame_.c_str());
@@ -72,6 +74,7 @@ namespace robot_self_filter
       RCLCPP_INFO(this->get_logger(), "  max_queue_size: %d", max_queue_size_);
       RCLCPP_INFO(this->get_logger(), "  lidar_sensor_type: %d", temp_sensor_type);
       RCLCPP_INFO(this->get_logger(), "  in_pointcloud_topic: %s", in_topic_.c_str());
+      RCLCPP_INFO(this->get_logger(), "  out_pointcloud_topic: %s", out_topic_.c_str());
 
       tf_buffer_ = std::make_shared<tf2_ros::Buffer>(this->get_clock());
       tf_buffer_->setCreateTimerInterface(
@@ -83,7 +86,7 @@ namespace robot_self_filter
       // Publish filtered cloud as sensor data QoS (BEST_EFFORT) for high-rate streams
       pointCloudPublisher_ =
           this->create_publisher<sensor_msgs::msg::PointCloud2>(
-              "cloud_out", rclcpp::SensorDataQoS());
+              out_topic_, rclcpp::SensorDataQoS());
 
       marker_pub_ =
           this->create_publisher<visualization_msgs::msg::MarkerArray>("collision_shapes", 1);
@@ -360,6 +363,7 @@ namespace robot_self_filter
     int max_queue_size_;
     std::vector<std::string> frames_;
     std::string in_topic_;
+    std::string out_topic_;
   };
 
 } // namespace robot_self_filter
