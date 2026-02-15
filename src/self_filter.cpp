@@ -101,12 +101,19 @@ namespace robot_self_filter
       }
 
       std::string topic = this->get_parameter("robot_description_topic").as_string();
-      RCLCPP_INFO(this->get_logger(), "No robot_description parameter provided, subscribing to topic: %s", topic.c_str());
+      if (!topic.empty() && topic != "")
+      {
+        RCLCPP_INFO(this->get_logger(), "Subscribing to robot description topic: %s", topic.c_str());
 
-      robot_desc_sub_ = this->create_subscription<std_msgs::msg::String>(
-          topic,
-          rclcpp::QoS(1).transient_local(),
-          std::bind(&SelfFilterNode::robotDescriptionCallback, this, std::placeholders::_1));
+        robot_desc_sub_ = this->create_subscription<std_msgs::msg::String>(
+            topic,
+            rclcpp::QoS(1).transient_local(),
+            std::bind(&SelfFilterNode::robotDescriptionCallback, this, std::placeholders::_1));
+
+        return;
+      }
+    
+      RCLCPP_ERROR(this->get_logger(), "No robot description provided via parameter or topic");
     }
 
   private:
@@ -120,6 +127,7 @@ namespace robot_self_filter
       RCLCPP_INFO(this->get_logger(), "Received robot description from topic");
       this->set_parameter(rclcpp::Parameter("robot_description", msg->data));
       robot_desc_sub_.reset();
+      RCLCPP_INFO(this->get_logger(), "Robot description subscription no longer needed, unsubscribed");
       setupFilter();
     }
 
@@ -154,6 +162,9 @@ namespace robot_self_filter
       }
 
       self_filter_->getLinkNames(frames_);
+
+      RCLCPP_INFO(this->get_logger(), "Initialized SelfFilter with %zu collision shapes", frames_.size());
+      RCLCPP_INFO(this->get_logger(), "Subscribing to point cloud topic: %s", in_topic_.c_str());
 
       // Subscribe to input cloud with sensor data QoS (BEST_EFFORT)
       rclcpp::QoS input_qos = rclcpp::SensorDataQoS();
